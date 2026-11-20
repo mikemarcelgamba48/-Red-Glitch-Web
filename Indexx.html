@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090000">
+<title>RED//GLITCH — 60 Second Visual Effect</title>
+<style>
+:root{color-scheme:dark;--red:#ff2020;--dim:#7e1010;--bg:#080000}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:#ffe5e5;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+body{overflow:hidden}
+main{min-height:100svh;display:grid;place-items:center;padding:22px;position:relative;isolation:isolate;background:radial-gradient(ellipse at center,#260000 0,#100000 42%,#050000 100%)}
+main:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.22;background:repeating-linear-gradient(0deg,transparent 0 3px,#ff2424 4px,transparent 5px 8px)}
+.panel{width:min(100%,560px);border:1px solid #a81717;background:#090000eF;box-shadow:0 0 30px #f0000033,inset 0 0 24px #a000001c;padding:clamp(20px,5vw,34px);text-align:center}
+.tag{color:#ff5656;letter-spacing:.22em;font-size:.72rem}
+h1{font-size:clamp(2rem,10vw,4rem);line-height:1;margin:18px 0 10px;color:#ff2525;text-shadow:2px 0 #fff, -3px 0 #730000;letter-spacing:.04em}
+.sub{color:#d89a9a;line-height:1.55;font-size:.9rem}
+#screen{display:none;margin:24px 0 14px;border:1px solid #d11;background:#120000;padding:18px 10px;min-height:180px;position:relative;overflow:hidden}
+#screen.active{display:block}
+.big{font-size:clamp(3.5rem,18vw,6rem);font-weight:900;color:#ff2424;text-shadow:3px 0 white,-3px 0 #780000;line-height:1}
+.status{margin-top:15px;color:#ff7777;letter-spacing:.15em;font-size:.78rem}
+.logs{height:60px;overflow:hidden;color:#c53b3b;font-size:.68rem;text-align:left;margin-top:15px;line-height:1.5}
+button{border:1px solid #ff3b3b;background:#b40000;color:white;padding:14px 20px;font:700 .9rem inherit;letter-spacing:.1em;cursor:pointer;min-height:48px;width:100%;margin-top:18px}
+button:focus-visible{outline:3px solid white;outline-offset:3px}
+button.secondary{background:transparent;color:#ff7777;margin-top:10px}
+.notice{font-size:.72rem;color:#bd8585;margin-top:18px;line-height:1.5}
+#done{display:none;color:#ff7777;font-size:1rem;margin-top:20px}
+body.running main{animation:screenJolt .17s steps(2,end) infinite}
+body.running .panel{animation:panelFlicker .12s steps(2,end) infinite}
+body.running h1{animation:titleShift .22s steps(2,end) infinite}
+body.running #screen:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 7px,#ff242433 8px 10px);animation:scan .5s linear infinite}
+body.running .big{animation:bigShift .16s steps(2,end) infinite}
+body.running .glitchbar{position:absolute;height:5px;background:#ff2525;left:-10%;width:120%;top:38%;box-shadow:0 0 15px red;animation:barMove .7s steps(3,end) infinite}
+@keyframes screenJolt{0%{transform:translate(0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-2px,1px)}75%{transform:translate(2px,0)}100%{transform:translate(0)}}
+@keyframes panelFlicker{0%,100%{opacity:1}50%{opacity:.84}}
+@keyframes titleShift{0%{transform:translateX(0)}50%{transform:translateX(2px)}100%{transform:translateX(-2px)}}
+@keyframes bigShift{0%{transform:translateX(-2px);clip-path:inset(0 0 35% 0)}50%{transform:translateX(2px);clip-path:inset(30% 0 0 0)}100%{transform:none;clip-path:none}}
+@keyframes scan{from{transform:translateY(-20px)}to{transform:translateY(20px)}}
+@keyframes barMove{0%{top:15%;transform:translateX(-8%)}50%{top:75%;transform:translateX(8%)}100%{top:35%;transform:translateX(-5%)}}
+@media(prefers-reduced-motion:reduce){body.running main,body.running .panel,body.running h1,body.running .big{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<section class="panel" aria-live="polite">
+  <div class="tag">VISUAL SIMULATION // NO DEVICE CHANGES</div>
+  <h1>RED//GLITCH</h1>
+  <p class="sub">A one-minute red hacker-screen visual effect.<br>Runs only on this webpage.</p>
+  <div id="screen">
+    <div class="glitchbar"></div>
+    <div class="tag">SIGNAL INSTABILITY — VISUAL ONLY</div>
+    <div class="big" id="timer">60</div>
+    <div class="status" id="status">SIMULATION RUNNING</div>
+    <div class="logs" id="logs">[SYS] Initialising visual layer…<br>[SAFE] No files, settings or other apps accessed.</div>
+  </div>
+  <button id="start">START 60-SECOND EFFECT</button>
+  <button id="stop" class="secondary" hidden>STOP EFFECT</button>
+  <div id="done">SIMULATION COMPLETE — SCREEN RESTORED</div>
+  <p class="notice">This is a visual prank, not a virus. It cannot damage the phone or affect other apps. Tap Stop at any time.</p>
+</section>
+</main>
+<script>
+(() => {
+ const start=document.getElementById('start'), stop=document.getElementById('stop');
+ const screen=document.getElementById('screen'), timer=document.getElementById('timer');
+ const status=document.getElementById('status'), done=document.getElementById('done'), logs=document.getElementById('logs');
+ let interval=null, endAt=0;
+ const messages=[
+  '[SYS] Rendering red scanline overlay…',
+  '[VISUAL] Simulated signal interference…',
+  '[SAFE] Local animation only; no data access.',
+  '[SYS] Recalibrating display simulation…',
+  '[VISUAL] Injecting harmless glitch frames…'
+ ];
+ let messageIndex=0;
+ function finish(){
+   if(interval) clearInterval(interval);
+   interval=null; document.body.classList.remove('running');
+   screen.classList.remove('active'); start.hidden=false; stop.hidden=true;
+   done.style.display='block'; status.textContent='SIMULATION COMPLETE';
+ }
+ function tick(){
+   const remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+   timer.textContent=String(remaining).padStart(2,'0');
+   if(remaining===0){finish();return}
+   if(remaining%5===0){
+     logs.innerHTML=messages[messageIndex%messages.length]+'<br>[SAFE] This page is not controlling your device.';
+     messageIndex++;
+   }
+ }
+ start.addEventListener('click',()=>{
+   if(interval) clearInterval(interval);
+   done.style.display='none'; screen.classList.add('active');
+   document.body.classList.add('running'); start.hidden=true; stop.hidden=false;
+   endAt=Date.now()+60000; tick(); interval=setInterval(tick,200);
+ });
+ stop.addEventListener('click',finish);
+})();
+</script>
+</body>
+</html>
